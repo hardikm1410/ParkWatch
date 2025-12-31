@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ParkingCircle, User, Shield } from 'lucide-react';
+import { ParkingCircle, User, Shield, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -43,6 +43,19 @@ export function Header() {
             <Link href="/admin">
               <Shield className="mr-2 h-4 w-4" />
               Admin
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            className={cn(
+              'transition-colors',
+              pathname === '/management' ? 'text-primary' : 'text-muted-foreground'
+            )}
+            asChild
+          >
+            <Link href="/management">
+              <Wrench className="mr-2 h-4 w-4" />
+              Management
             </Link>
           </Button>
         </nav>
