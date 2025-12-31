@@ -37,6 +37,9 @@ export type RecommendOptimalFeesOutput = z.infer<typeof RecommendOptimalFeesOutp
 export async function recommendOptimalFees(
   input: RecommendOptimalFeesInput
 ): Promise<RecommendOptimalFeesOutput> {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('Gemini API key is not configured.');
+  }
   return recommendOptimalFeesFlow(input);
 }
 

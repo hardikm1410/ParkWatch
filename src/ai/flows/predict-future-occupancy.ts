@@ -32,6 +32,9 @@ export type PredictFutureOccupancyOutput = z.infer<typeof PredictFutureOccupancy
 export async function predictFutureOccupancy(
   input: PredictFutureOccupancyInput
 ): Promise<PredictFutureOccupancyOutput> {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('Gemini API key is not configured.');
+  }
   return predictFutureOccupancyFlow(input);
 }
 
