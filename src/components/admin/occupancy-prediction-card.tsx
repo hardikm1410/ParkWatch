@@ -14,11 +14,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Loader2, Wand2 } from 'lucide-react';
+import { CalendarIcon, Loader2, Wand2, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type { ParkingLocation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const FormSchema = z.object({
   parkingLocation: z.string().min(1, 'Please select a parking location.'),
@@ -34,6 +35,7 @@ export default function OccupancyPredictionCard({ locations }: OccupancyPredicti
   const [prediction, setPrediction] = useState<PredictFutureOccupancyOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -83,81 +85,94 @@ export default function OccupancyPredictionCard({ locations }: OccupancyPredicti
             </CardDescription>
           </CardHeader>
           <CardContent className="grid md:grid-cols-3 gap-6">
-            <FormField
-              control={form.control}
-              name="parkingLocation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+            {!geminiApiKey && (
+                <div className="md:col-span-3">
+                    <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>API Key Missing</AlertTitle>
+                        <AlertDescription>
+                        The Gemini API key is not configured. Please set it in the environment variables.
+                        </AlertDescription>
+                    </Alert>
+                </div>
+            )}
+            <fieldset disabled={!geminiApiKey} className="grid md:grid-cols-3 gap-6 contents">
+                <FormField
+                control={form.control}
+                name="parkingLocation"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a location" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        {locations.map((loc) => (
+                            <SelectItem key={loc.id} value={loc.name}>
+                            {loc.name}
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                    <FormLabel>Date</FormLabel>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                        <FormControl>
+                            <Button
+                            variant={'outline'}
+                            className={cn(
+                                'pl-3 text-left font-normal',
+                                !field.value && 'text-muted-foreground'
+                            )}
+                            >
+                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                        </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date('1900-01-01')}
+                            initialFocus
+                        />
+                        </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Time (24h)</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a location" />
-                      </SelectTrigger>
+                        <Input {...field} placeholder="e.g., 14:30" />
                     </FormControl>
-                    <SelectContent>
-                      {locations.map((loc) => (
-                        <SelectItem key={loc.id} value={loc.name}>
-                          {loc.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date < new Date('1900-01-01')}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="time"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Time (24h)</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="e.g., 14:30" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            </fieldset>
           </CardContent>
           <CardFooter className="flex flex-col items-start gap-4">
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading || !geminiApiKey}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
