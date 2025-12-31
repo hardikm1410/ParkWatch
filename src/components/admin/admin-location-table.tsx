@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Car, DollarSign, MapPin } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type AdminLocationTableProps = {
   locations: ParkingLocation[];
