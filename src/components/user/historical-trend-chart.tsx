@@ -65,8 +65,8 @@ export default function HistoricalTrendChart({ locationId }: HistoricalTrendChar
       </CardHeader>
       <CardContent>
         <div className="h-[150px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+          <ChartContainer config={chartConfig}>
+            <BarChart accessibilityLayer data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis
                 dataKey="day"
@@ -88,7 +88,7 @@ export default function HistoricalTrendChart({ locationId }: HistoricalTrendChar
               />
               <Bar dataKey="occupancy" fill="var(--color-occupancy)" radius={4} />
             </BarChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         </div>
       </CardContent>
     </Card>
