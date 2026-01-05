@@ -13,9 +13,10 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Timer } from 'lucide-react';
+import { MapPin, Timer, Ticket, XCircle } from 'lucide-react';
 import OccupancyBar from './occupancy-bar';
 import HistoricalTrendChart from './historical-trend-chart';
+import { cn } from '@/lib/utils';
 
 type ParkingLocationCardProps = {
   location: ParkingLocation;
@@ -69,7 +70,7 @@ export default function ParkingLocationCard({ location }: ParkingLocationCardPro
             data-ai-hint={location.imageHint}
           />
           {isBooked && (
-            <div className="absolute top-2 right-2 flex items-center gap-2 rounded-full bg-primary/80 px-3 py-1 text-primary-foreground backdrop-blur-sm">
+            <div className="absolute top-2 right-2 flex items-center gap-2 rounded-full bg-primary/80 px-3 py-1 text-primary-foreground backdrop-blur-sm animate-pulse">
               <Timer className="h-4 w-4" />
               <span className="text-sm font-semibold">{formatTime(countdown)}</span>
             </div>
@@ -99,8 +100,25 @@ export default function ParkingLocationCard({ location }: ParkingLocationCardPro
         </div>
       </CardContent>
       <CardFooter className="p-6 pt-0">
-        <Button onClick={handleBooking} disabled={!isBooked && availableSpots <= 0} className="w-full">
-          {isBooked ? `Cancel Reservation (${formatTime(countdown)})` : 'Book a Spot'}
+        <Button 
+          onClick={handleBooking} 
+          disabled={!isBooked && availableSpots <= 0} 
+          className={cn(
+            "w-full transition-all duration-300",
+            isBooked ? 'bg-destructive/90 hover:bg-destructive' : 'bg-accent hover:bg-accent/90'
+          )}
+        >
+          {isBooked ? (
+            <>
+              <XCircle className="mr-2 h-4 w-4" />
+              Cancel Reservation
+            </>
+          ) : (
+            <>
+              <Ticket className="mr-2 h-4 w-4" />
+              Book a Spot
+            </>
+          )}
         </Button>
       </CardFooter>
     </Card>
