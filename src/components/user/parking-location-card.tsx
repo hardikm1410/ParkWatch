@@ -27,7 +27,6 @@ export default function ParkingLocationCard({ location }: ParkingLocationCardPro
 
   const availableSpots = location.totalSpots - location.occupiedSpots - (isBooked ? 1 : 0);
   const occupiedSpots = location.occupiedSpots + (isBooked ? 1 : 0);
-  const occupancyPercentage = (occupiedSpots / location.totalSpots) * 100;
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
