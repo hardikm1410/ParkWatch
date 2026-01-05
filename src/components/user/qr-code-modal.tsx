@@ -26,16 +26,8 @@ export default function QrCodeModal({
   bookingDetails,
 }: QrCodeModalProps) {
 
-  const qrData = JSON.stringify({
-    location: bookingDetails.locationName,
-    vehicleNumber: bookingDetails.vehicleNumber,
-    vehicleType: bookingDetails.vehicleType,
-    bookedAt: bookingDetails.bookedAt.toISOString(),
-  });
-
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
-    qrData
-  )}`;
+  // Using a sample image instead of a QR code
+  const sampleImageUrl = `https://picsum.photos/seed/qr-placeholder/256/256`;
   
   const vehicleTypeMap = {
     '2w': '2 Wheeler',
@@ -47,14 +39,14 @@ export default function QrCodeModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Your Booking QR Code</DialogTitle>
+          <DialogTitle>Your Booking Confirmation</DialogTitle>
           <DialogDescription>
-            Scan this code at the entry gate. This reservation is valid for 15 minutes.
+            Show this confirmation at the entry gate. This reservation is valid for 15 minutes.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col items-center justify-center gap-4 py-4">
           <div className="relative h-64 w-64 rounded-lg overflow-hidden border">
-            <Image src={qrCodeUrl} alt="Booking QR Code" fill sizes="256px" />
+            <Image src={sampleImageUrl} alt="Booking Confirmation" fill sizes="256px" />
           </div>
           <div className="text-center text-sm text-muted-foreground w-full">
             <p><span className="font-semibold text-foreground">Location:</span> {bookingDetails.locationName}</p>
