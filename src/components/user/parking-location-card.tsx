@@ -144,6 +144,7 @@ export default function ParkingLocationCard({
         isOpen={isBookingModalOpen}
         onClose={() => setIsBookingModalOpen(false)}
         onConfirm={handleConfirmBooking}
+        location={location}
       />
       {bookingDetails && (
         <QrCodeModal 

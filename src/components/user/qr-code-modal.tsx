@@ -26,8 +26,15 @@ export default function QrCodeModal({
   bookingDetails,
 }: QrCodeModalProps) {
 
-  // Using a sample image instead of a QR code
-  const sampleImageUrl = `https://picsum.photos/seed/qr-placeholder/256/256`;
+  const qrCodeData = JSON.stringify({
+    location: bookingDetails.locationName,
+    vehicleNumber: bookingDetails.vehicleNumber,
+    vehicleType: bookingDetails.vehicleType,
+    bookedAt: bookingDetails.bookedAt,
+    duration: bookingDetails.duration,
+    finalFee: bookingDetails.finalFee,
+  });
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(qrCodeData)}`;
   
   const vehicleTypeMap = {
     '2w': '2 Wheeler',
@@ -46,11 +53,13 @@ export default function QrCodeModal({
         </DialogHeader>
         <div className="flex flex-col items-center justify-center gap-4 py-4">
           <div className="relative h-64 w-64 rounded-lg overflow-hidden border">
-            <Image src={sampleImageUrl} alt="Booking Confirmation" fill sizes="256px" />
+            <Image src={qrCodeUrl} alt="Booking QR Code" fill sizes="256px" />
           </div>
-          <div className="text-center text-sm text-muted-foreground w-full">
+          <div className="text-center text-sm text-muted-foreground w-full space-y-1">
             <p><span className="font-semibold text-foreground">Location:</span> {bookingDetails.locationName}</p>
             <p><span className="font-semibold text-foreground">Vehicle:</span> {bookingDetails.vehicleNumber} ({vehicleTypeMap[bookingDetails.vehicleType]})</p>
+            <p><span className="font-semibold text-foreground">Duration:</span> {bookingDetails.duration} hour(s)</p>
+            <p><span className="font-semibold text-foreground">Amount Paid:</span> ${bookingDetails.finalFee.toFixed(2)}</p>
             <p><span className="font-semibold text-foreground">Booked At:</span> {format(bookingDetails.bookedAt, 'PPpp')}</p>
           </div>
         </div>

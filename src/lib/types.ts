@@ -19,4 +19,6 @@ export type BookingDetails = {
   vehicleNumber: string;
   vehicleType: '2w' | '4w' | 'auto';
   bookedAt: Date;
+  duration: number; // in hours
+  finalFee: number;
 };
