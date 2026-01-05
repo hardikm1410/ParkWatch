@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import type { ParkingLocation, BookingDetails } from '@/lib/types';
 import {
@@ -16,34 +16,34 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Timer, Ticket, XCircle, QrCode } from 'lucide-react';
 import OccupancyBar from './occupancy-bar';
 import HistoricalTrendChart from './historical-trend-chart';
-import { cn } from '@/lib/utils';
 import BookingModal from './booking-modal';
 import QrCodeModal from './qr-code-modal';
 
 type ParkingLocationCardProps = {
   location: ParkingLocation;
+  isBooked: boolean;
+  countdown: number;
+  bookingDetails: (BookingDetails & { locationId: string }) | null;
+  onConfirmBooking: (
+    locationId: string,
+    details: Omit<BookingDetails, 'bookedAt' | 'locationName'>
+  ) => void;
+  onCancelBooking: (locationId: string) => void;
 };
 
-export default function ParkingLocationCard({ location }: ParkingLocationCardProps) {
-  const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
-  const [countdown, setCountdown] = useState(0);
+export default function ParkingLocationCard({
+  location,
+  isBooked,
+  countdown,
+  bookingDetails,
+  onConfirmBooking,
+  onCancelBooking,
+}: ParkingLocationCardProps) {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
-
-  const isBooked = !!bookingDetails;
   const availableSpots = location.totalSpots - location.occupiedSpots - (isBooked ? 1 : 0);
   const occupiedSpots = location.occupiedSpots + (isBooked ? 1 : 0);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isBooked && countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    } else if (isBooked && countdown === 0) {
-      setBookingDetails(null); // Release booking when timer ends
-    }
-    return () => clearTimeout(timer);
-  }, [isBooked, countdown]);
 
   const handleBookingInitiation = () => {
     if (availableSpots > 0) {
@@ -51,19 +51,13 @@ export default function ParkingLocationCard({ location }: ParkingLocationCardPro
     }
   };
 
-  const handleConfirmBooking = (details: Omit<BookingDetails, 'locationName' | 'bookedAt'>) => {
-    setBookingDetails({ 
-        ...details,
-        locationName: location.name,
-        bookedAt: new Date(),
-    });
-    setCountdown(15 * 60); // 15 minutes in seconds
+  const handleConfirmBooking = (details: Omit<BookingDetails, 'bookedAt' | 'locationName'>) => {
+    onConfirmBooking(location.id, details);
     setIsBookingModalOpen(false);
   };
 
   const handleCancelBooking = () => {
-    setBookingDetails(null);
-    setCountdown(0);
+    onCancelBooking(location.id);
   };
 
   const formatTime = (seconds: number) => {
