@@ -1,3 +1,7 @@
+
+'use client';
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import type { ParkingLocation } from '@/lib/types';
 import {
@@ -6,8 +10,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
-import { MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MapPin, Timer } from 'lucide-react';
 import OccupancyBar from './occupancy-bar';
 import HistoricalTrendChart from './historical-trend-chart';
 
@@ -16,8 +22,40 @@ type ParkingLocationCardProps = {
 };
 
 export default function ParkingLocationCard({ location }: ParkingLocationCardProps) {
-  const availableSpots = location.totalSpots - location.occupiedSpots;
-  const occupancyPercentage = (location.occupiedSpots / location.totalSpots) * 100;
+  const [isBooked, setIsBooked] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  const availableSpots = location.totalSpots - location.occupiedSpots - (isBooked ? 1 : 0);
+  const occupiedSpots = location.occupiedSpots + (isBooked ? 1 : 0);
+  const occupancyPercentage = (occupiedSpots / location.totalSpots) * 100;
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isBooked && countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    } else if (isBooked && countdown === 0) {
+      setIsBooked(false); // Release booking when timer ends
+    }
+    return () => clearTimeout(timer);
+  }, [isBooked, countdown]);
+
+  const handleBooking = () => {
+    if (isBooked) {
+      // Cancel booking
+      setIsBooked(false);
+      setCountdown(0);
+    } else if (availableSpots > 0) {
+      // Start booking
+      setIsBooked(true);
+      setCountdown(15 * 60); // 15 minutes in seconds
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
@@ -31,6 +69,12 @@ export default function ParkingLocationCard({ location }: ParkingLocationCardPro
             className="object-cover"
             data-ai-hint={location.imageHint}
           />
+          {isBooked && (
+            <div className="absolute top-2 right-2 flex items-center gap-2 rounded-full bg-primary/80 px-3 py-1 text-primary-foreground backdrop-blur-sm">
+              <Timer className="h-4 w-4" />
+              <span className="text-sm font-semibold">{formatTime(countdown)}</span>
+            </div>
+          )}
         </div>
         <div className="p-6 pb-2">
           <CardTitle className="text-xl font-headline">{location.name}</CardTitle>
@@ -48,13 +92,18 @@ export default function ParkingLocationCard({ location }: ParkingLocationCardPro
               <span className="text-lg font-bold text-accent">{availableSpots} <span className="text-sm font-medium text-muted-foreground">/ {location.totalSpots} spots</span></span>
             </div>
             <OccupancyBar
-              occupied={location.occupiedSpots}
+              occupied={occupiedSpots}
               total={location.totalSpots}
             />
           </div>
           <HistoricalTrendChart locationId={location.id} />
         </div>
       </CardContent>
+      <CardFooter className="p-6 pt-0">
+        <Button onClick={handleBooking} disabled={!isBooked && availableSpots <= 0} className="w-full">
+          {isBooked ? `Cancel Reservation (${formatTime(countdown)})` : 'Book a Spot'}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
