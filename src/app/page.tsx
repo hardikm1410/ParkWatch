@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { parkingLocations as initialLocations } from '@/lib/data';
 import type { ParkingLocation, BookingDetails } from '@/lib/types';
 import ParkingLocationCard from '@/components/user/parking-location-card';
+import { Separator } from '@/components/ui/separator';
 
 export default function UserDashboard() {
   const [locations, setLocations] = useState<ParkingLocation[]>(initialLocations);
@@ -72,34 +73,50 @@ export default function UserDashboard() {
     }
   };
 
-  const sortedLocations = [...locations].sort((a, b) => {
-    if (bookingDetails) {
-      if (a.id === bookingDetails.locationId) return -1;
-      if (b.id === bookingDetails.locationId) return 1;
-    }
-    return 0;
-  });
+  const bookedLocation = bookingDetails ? locations.find(l => l.id === bookingDetails.locationId) : null;
+  const otherLocations = locations.filter(l => !bookingDetails || l.id !== bookingDetails.locationId);
+
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="mb-8 text-4xl font-bold tracking-tighter text-center font-headline">
         Find Parking Fast
       </h1>
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {sortedLocations.map((location) => {
-            const isBooked = bookingDetails?.locationId === location.id;
-            return (
-                <ParkingLocationCard 
-                    key={location.id} 
-                    location={location}
-                    isBooked={isBooked}
-                    countdown={isBooked ? countdown : 0}
-                    bookingDetails={isBooked ? bookingDetails : null}
+      <div className="space-y-12">
+        {bookedLocation && (
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight mb-4">Your Active Booking</h2>
+            <div className="flex justify-center">
+                 <ParkingLocationCard 
+                    key={bookedLocation.id} 
+                    location={bookedLocation}
+                    isBooked={true}
+                    countdown={countdown}
+                    bookingDetails={bookingDetails}
                     onConfirmBooking={handleConfirmBooking}
                     onCancelBooking={handleCancelBooking}
                 />
-            )
-        })}
+            </div>
+            <Separator className="my-8" />
+          </div>
+        )}
+
+        <div>
+            <h2 className="text-2xl font-bold tracking-tight mb-4">{bookedLocation ? 'Other Locations' : 'Available Locations'}</h2>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {otherLocations.map((location) => (
+                <ParkingLocationCard 
+                    key={location.id} 
+                    location={location}
+                    isBooked={false}
+                    countdown={0}
+                    bookingDetails={null}
+                    onConfirmBooking={handleConfirmBooking}
+                    onCancelBooking={handleCancelBooking}
+                />
+            ))}
+            </div>
+        </div>
       </div>
     </div>
   );
