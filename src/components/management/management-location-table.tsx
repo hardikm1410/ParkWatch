@@ -1,6 +1,7 @@
 'use client';
 import type { ParkingLocation } from '@/lib/types';
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -18,7 +19,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Car, DollarSign, Edit, Save, X } from 'lucide-react';
+import { MapPin, LayoutGrid, Edit, Save, X } from 'lucide-react';
 
 
 type ManagementLocationTableProps = {
@@ -113,21 +114,29 @@ export default function ManagementLocationTable({ locations, onUpdateOccupancy }
                     </div>
                   </TableCell>
                    <TableCell className="text-right">
-                    {isEditing ? (
-                      <div className="flex gap-1 justify-end">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleSave(location.id)}>
-                          <Save className="h-4 w-4 text-primary" />
+                    <div className="flex justify-end gap-2">
+                        {isEditing ? (
+                        <div className="flex gap-1 justify-end">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleSave(location.id)}>
+                            <Save className="h-4 w-4 text-primary" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCancel(location.id)}>
+                            <X className="h-4 w-4 text-destructive" />
+                            </Button>
+                        </div>
+                        ) : (
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(location.id, location.occupiedSpots)}>
+                            <Edit className="h-3 w-3 mr-1" />
+                            Update
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCancel(location.id)}>
-                          <X className="h-4 w-4 text-destructive" />
+                        )}
+                         <Button variant="outline" size="sm" asChild>
+                            <Link href={`/management/visualizer?location=${location.id}`}>
+                                <LayoutGrid className="h-3 w-3 mr-1" />
+                                Visualize
+                            </Link>
                         </Button>
-                      </div>
-                    ) : (
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(location.id, location.occupiedSpots)}>
-                        <Edit className="h-3 w-3 mr-1" />
-                        Update
-                      </Button>
-                    )}
+                    </div>
                   </TableCell>
                 </TableRow>
               );

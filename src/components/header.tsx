@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ParkingCircle, User, Shield, Wrench } from 'lucide-react';
+import { ParkingCircle, User, Shield, Wrench, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -49,7 +49,7 @@ export function Header() {
             variant="ghost"
             className={cn(
               'transition-colors',
-              pathname === '/management' ? 'text-primary' : 'text-muted-foreground'
+              pathname?.startsWith('/management') ? 'text-primary' : 'text-muted-foreground'
             )}
             asChild
           >
