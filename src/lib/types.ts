@@ -22,3 +22,14 @@ export type BookingDetails = {
   duration: number; // in hours
   finalFee: number;
 };
+
+export type ParkedVehicle = {
+  id: string;
+  vehicleNumber: string;
+  vehicleType: '2w' | '4w' | 'auto';
+  checkInTime: Date;
+  duration: number; // in hours
+  chargesPaid: number;
+  locationName: string;
+  mobileNumber?: string;
+};
