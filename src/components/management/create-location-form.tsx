@@ -30,7 +30,7 @@ export default function CreateLocationForm({ onAddLocation }: CreateLocationForm
       name: '',
       address: '',
       totalSpots: 100,
-      currentFee: 5,
+      currentFee: 50,
     },
   });
 
@@ -102,9 +102,9 @@ export default function CreateLocationForm({ onAddLocation }: CreateLocationForm
                 name="currentFee"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Fee ($)</FormLabel>
+                    <FormLabel>Fee (₹)</FormLabel>
                     <FormControl>
-                        <Input type="number" step="0.5" {...field} />
+                        <Input type="number" step="10" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>

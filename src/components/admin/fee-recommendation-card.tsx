@@ -119,7 +119,7 @@ export default function FeeRecommendationCard({ locations }: FeeRecommendationCa
                       </SelectContent>
                     </Select>
                     {selectedLocation && (
-                       <p className="text-xs text-muted-foreground mt-1">Current Fee: ${selectedLocation.currentFee.toFixed(2)}</p>
+                       <p className="text-xs text-muted-foreground mt-1">Current Fee: ₹{selectedLocation.currentFee.toFixed(2)}</p>
                     )}
                     <FormMessage />
                   </FormItem>
@@ -169,7 +169,7 @@ export default function FeeRecommendationCard({ locations }: FeeRecommendationCa
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">Recommended Fee</p>
                     <p className="text-4xl font-bold text-accent">
-                      ${recommendation.recommendedFee.toFixed(2)}
+                      ₹{recommendation.recommendedFee.toFixed(2)}
                     </p>
                   </div>
                   <div>

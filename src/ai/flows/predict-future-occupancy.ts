@@ -51,7 +51,7 @@ const predictFutureOccupancyPrompt = ai.definePrompt({
 
   Consider factors such as day of the week, time of day, and any known events that might affect parking demand.
 
-  Provide a predicted occupancy rate as a percentage (0-100) and a recommended parking fee in USD.
+  Provide a predicted occupancy rate as a percentage (0-100) and a recommended parking fee in INR.
   Also, explain your reasoning behind your prediction and recommendation.
 
   Format your response according to the following schema:

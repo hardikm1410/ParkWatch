@@ -108,7 +108,7 @@ export default function ManagementLocationTable({ locations, onUpdateOccupancy }
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="font-mono flex items-center justify-end gap-1">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">₹</span>
                         {location.currentFee.toFixed(2)}
                     </div>
                   </TableCell>

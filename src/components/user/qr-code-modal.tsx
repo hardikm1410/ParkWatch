@@ -34,7 +34,7 @@ export default function QrCodeModal({
     duration: bookingDetails.duration,
     finalFee: bookingDetails.finalFee,
   });
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(qrCodeData)}`;
+  const qrCodeUrl = `https://picsum.photos/seed/${bookingDetails.vehicleNumber}/256/256`;
   
   const vehicleTypeMap = {
     '2w': '2 Wheeler',
@@ -59,7 +59,7 @@ export default function QrCodeModal({
             <p><span className="font-semibold text-foreground">Location:</span> {bookingDetails.locationName}</p>
             <p><span className="font-semibold text-foreground">Vehicle:</span> {bookingDetails.vehicleNumber} ({vehicleTypeMap[bookingDetails.vehicleType]})</p>
             <p><span className="font-semibold text-foreground">Duration:</span> {bookingDetails.duration} hour(s)</p>
-            <p><span className="font-semibold text-foreground">Amount Paid:</span> ${bookingDetails.finalFee.toFixed(2)}</p>
+            <p><span className="font-semibold text-foreground">Amount Paid:</span> ₹{bookingDetails.finalFee.toFixed(2)}</p>
             <p><span className="font-semibold text-foreground">Booked At:</span> {format(bookingDetails.bookedAt, 'PPpp')}</p>
           </div>
         </div>

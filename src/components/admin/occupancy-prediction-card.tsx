@@ -199,7 +199,7 @@ export default function OccupancyPredictionCard({ locations }: OccupancyPredicti
                     <div>
                       <p className="text-sm text-muted-foreground">Recommended Fee</p>
                       <p className="text-3xl font-bold text-primary">
-                        ${prediction.recommendedParkingFee.toFixed(2)}
+                        ₹{prediction.recommendedParkingFee.toFixed(2)}
                       </p>
                     </div>
                   </div>

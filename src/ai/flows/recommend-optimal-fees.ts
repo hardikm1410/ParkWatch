@@ -47,7 +47,7 @@ const recommendOptimalFeesPrompt = ai.definePrompt({
   name: 'recommendOptimalFeesPrompt',
   input: {schema: RecommendOptimalFeesInputSchema},
   output: {schema: RecommendOptimalFeesOutputSchema},
-  prompt: `You are an expert in optimizing parking fees to maximize revenue while ensuring customer satisfaction. Analyze the predicted occupancy rate and the current fee, then recommend an optimal fee and explain your reasoning.
+  prompt: `You are an expert in optimizing parking fees to maximize revenue while ensuring customer satisfaction. Analyze the predicted occupancy rate and the current fee, then recommend an optimal fee and explain your reasoning. The currency is INR.
 
 Parking Location: {{parkingLocation}}
 Current Fee: {{currentFee}}
