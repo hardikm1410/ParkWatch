@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PlusCircle, FileCheck } from 'lucide-react';
+import type { ParkingLocation } from '@/lib/types';
 
 const FormSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters.'),
@@ -17,6 +18,7 @@ const FormSchema = z.object({
   document: z
     .any()
     .refine((files) => typeof window === 'undefined' || (files instanceof FileList && files.length > 0), 'A verification document is required.')
+    .optional(), // Making optional as we are not processing it
 });
 
 type CreateLocationFormProps = {
@@ -39,7 +41,9 @@ export default function CreateLocationForm({ onAddLocation }: CreateLocationForm
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     const { document, ...locationData } = data;
-    console.log("Verification document submitted:", document[0].name);
+    if (document && document.length > 0) {
+        console.log("Verification document submitted:", document[0].name);
+    }
 
     onAddLocation(locationData);
     form.reset();
@@ -120,7 +124,7 @@ export default function CreateLocationForm({ onAddLocation }: CreateLocationForm
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
                     <FileCheck className="h-4 w-4" />
-                    Verification Document
+                    Verification Document (Optional)
                   </FormLabel>
                   <FormControl>
                     <Input type="file" {...documentRef} />

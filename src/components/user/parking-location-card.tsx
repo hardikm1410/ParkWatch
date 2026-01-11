@@ -18,6 +18,9 @@ import OccupancyBar from './occupancy-bar';
 import HistoricalTrendChart from './historical-trend-chart';
 import BookingModal from './booking-modal';
 import QrCodeModal from './qr-code-modal';
+import { useUser } from '@/firebase/index';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 type ParkingLocationCardProps = {
   location: ParkingLocation;
@@ -41,8 +44,24 @@ export default function ParkingLocationCard({
 }: ParkingLocationCardProps) {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const { user, loading } = useUser();
+  const router = useRouter();
+  const { toast } = useToast();
 
   const availableSpots = location.totalSpots - location.occupiedSpots;
+
+  const handleBookClick = () => {
+    if (!user && !loading) {
+      toast({
+        title: 'Login Required',
+        description: 'Please log in to book a parking spot.',
+        variant: 'destructive',
+      });
+      router.push('/login?redirect=/');
+    } else if (user) {
+      setIsBookingModalOpen(true);
+    }
+  };
 
   const handleConfirmBooking = (details: Omit<BookingDetails, 'bookedAt' | 'locationName'>) => {
     onConfirmBooking(location.id, details);
@@ -123,8 +142,8 @@ export default function ParkingLocationCard({
             </>
           ) : (
             <Button
-              onClick={() => setIsBookingModalOpen(true)}
-              disabled={availableSpots <= 0}
+              onClick={handleBookClick}
+              disabled={availableSpots <= 0 || loading}
               className="w-full transition-all duration-300 bg-accent hover:bg-accent/90 col-span-2"
             >
               <Ticket className="mr-2 h-4 w-4" />

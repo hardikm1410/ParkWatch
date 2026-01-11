@@ -1,13 +1,30 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ParkingCircle, User, Shield, Wrench } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import {
+  ParkingCircle,
+  User,
+  Shield,
+  Wrench,
+  LogOut,
+  LogIn,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useUser } from '@/firebase/index';
+import { getAuth, signOut } from 'firebase/auth';
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading } = useUser();
+
+  const handleLogout = async () => {
+    const auth = getAuth();
+    await signOut(auth);
+    router.push('/');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -18,7 +35,7 @@ export function Header() {
             ParkWatch
           </span>
         </Link>
-        <nav className="flex items-center space-x-2">
+        <nav className="flex items-center space-x-2 flex-1">
           <Button
             variant="ghost"
             className={cn(
@@ -49,7 +66,9 @@ export function Header() {
             variant="ghost"
             className={cn(
               'transition-colors',
-               pathname?.startsWith('/management') ? 'text-primary' : 'text-muted-foreground'
+              pathname?.startsWith('/management')
+                ? 'text-primary'
+                : 'text-muted-foreground'
             )}
             asChild
           >
@@ -59,6 +78,23 @@ export function Header() {
             </Link>
           </Button>
         </nav>
+
+        <div className="flex items-center gap-2">
+          {!loading &&
+            (user ? (
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            ) : (
+              <Button variant="default" size="sm" asChild>
+                <Link href="/login">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
+                </Link>
+              </Button>
+            ))}
+        </div>
       </div>
     </header>
   );

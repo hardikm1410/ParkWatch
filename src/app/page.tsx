@@ -1,36 +1,30 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
-import { parkingLocations } from '@/lib/data';
 import type { ParkingLocation, BookingDetails } from '@/lib/types';
 import ParkingLocationCard from '@/components/user/parking-location-card';
 import { Separator } from '@/components/ui/separator';
+import { useUser, useFirestore, useCollection } from '@/firebase/index';
+import { collection, doc, updateDoc, writeBatch, getDoc } from 'firebase/firestore';
+import type { Firestore } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export default function UserDashboard() {
-  const [locations, setLocations] = useState<ParkingLocation[]>(parkingLocations);
-  const [bookingDetails, setBookingDetails] = useState<
-    (BookingDetails & { locationId: string }) | null
-  >(null);
+  const firestore = useFirestore() as Firestore;
+  const { user, loading: userLoading } = useUser();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const locationsQuery = firestore ? collection(firestore, 'parkingLocations') : null;
+  const { data: locations, loading: locationsLoading, setData: setLocations } = useCollection<ParkingLocation>(locationsQuery);
+
+  const [bookingDetails, setBookingDetails] = useState<(BookingDetails & { locationId: string }) | null>(null);
   const [countdown, setCountdown] = useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLocations(currentLocations => {
-        return currentLocations.map(loc => {
-          if (bookingDetails && loc.id === bookingDetails.locationId) {
-            return loc; // Don't simulate changes for the booked location
-          }
-          const change = Math.random() > 0.7 ? (Math.random() > 0.5 ? 1 : -1) : 0;
-          let newOccupiedSpots = loc.occupiedSpots + change;
-          if (newOccupiedSpots < 0) newOccupiedSpots = 0;
-          if (newOccupiedSpots > loc.totalSpots) newOccupiedSpots = loc.totalSpots;
-          return { ...loc, occupiedSpots: newOccupiedSpots };
-        });
-      });
-    }, 5000); // Simulate occupancy changes every 5 seconds
-
-    return () => clearInterval(interval);
-  }, [bookingDetails]);
+  // In a real app, we would listen to live updates from Firestore
+  // For this simulation, we'll just show the static data from the initial load
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -38,66 +32,132 @@ export default function UserDashboard() {
       timer = setTimeout(() => setCountdown(countdown - 1), 1000);
     } else if (bookingDetails && countdown === 0) {
       // Release booking when timer ends
-      setLocations(prev => prev.map(loc => 
-        loc.id === bookingDetails.locationId 
-          ? { ...loc, occupiedSpots: loc.occupiedSpots - 1 } 
-          : loc
-      ));
-      setBookingDetails(null);
+      handleCancelBooking(bookingDetails.locationId, true); // Silent cancellation
     }
     return () => clearTimeout(timer);
   }, [bookingDetails, countdown]);
 
-  const handleConfirmBooking = (
+  const handleConfirmBooking = async (
     locationId: string,
     details: Omit<BookingDetails, 'bookedAt' | 'locationName'>
   ) => {
+    if (!user) {
+        toast({
+            title: "Authentication Required",
+            description: "Please log in to book a spot.",
+            variant: "destructive",
+        });
+        router.push(`/login?redirect=/`);
+        return;
+    }
+
+    if (!firestore || !locations) return;
+
     const location = locations.find(l => l.id === locationId);
     if (!location) return;
 
     if(bookingDetails){
-        // In this implementation, only one booking is allowed at a time.
-        // If another booking is made, the previous one is cancelled.
         console.log("Cancelling previous booking to make a new one.");
-        setLocations(prev => prev.map(loc => 
-            loc.id === bookingDetails.locationId 
-            ? { ...loc, occupiedSpots: loc.occupiedSpots - 1 } 
-            : loc
-        ));
+        await handleCancelBooking(bookingDetails.locationId, true);
     }
-    
-    setBookingDetails({
+
+    const newBookingDetails = {
       ...details,
       locationId: locationId,
       locationName: location.name,
       bookedAt: new Date(),
-    });
+    };
+    
+    setBookingDetails(newBookingDetails);
     setCountdown(15 * 60); // 15 minutes
 
-    // Optimistically update occupancy
-    setLocations(prev => prev.map(loc => 
+    // Optimistically update UI
+    const originalLocations = locations;
+    const updatedLocations = originalLocations.map(loc => 
         loc.id === locationId 
         ? { ...loc, occupiedSpots: loc.occupiedSpots + 1 } 
         : loc
-    ));
-  };
+    );
+    setLocations(updatedLocations);
+    
+    // Update Firestore
+    const locationRef = doc(firestore, "parkingLocations", locationId);
+    try {
+        const locationDoc = await getDoc(locationRef);
+        if(!locationDoc.exists()) throw new Error("Location not found");
 
-  const handleCancelBooking = (locationId: string) => {
-    if (bookingDetails && bookingDetails.locationId === locationId) {
-      setBookingDetails(null);
-      setCountdown(0);
-      // Revert occupancy
-      setLocations(prev => prev.map(loc => 
-        loc.id === locationId 
-          ? { ...loc, occupiedSpots: loc.occupiedSpots - 1 } 
-          : loc
-      ));
+        const currentSpots = locationDoc.data().occupiedSpots;
+        await updateDoc(locationRef, { occupiedSpots: currentSpots + 1 });
+    } catch(e) {
+        console.error("Failed to update booking:", e);
+        // Revert optimistic update
+        setLocations(originalLocations);
+        setBookingDetails(null);
+        setCountdown(0);
+        toast({
+            title: "Booking Failed",
+            description: "Could not reserve the spot. Please try again.",
+            variant: "destructive",
+        });
     }
   };
 
-  const bookedLocation = bookingDetails ? locations.find(l => l.id === bookingDetails.locationId) : null;
-  const otherLocations = locations.filter(l => !bookingDetails || l.id !== bookingDetails.locationId);
+  const handleCancelBooking = async (locationId: string, silent = false) => {
+    if (!bookingDetails || bookingDetails.locationId !== locationId || !firestore || !locations) {
+      return;
+    }
 
+    const bookingToCancel = { ...bookingDetails };
+    
+    // Optimistically update UI
+    setBookingDetails(null);
+    setCountdown(0);
+    const originalLocations = locations;
+    const updatedLocations = originalLocations.map(loc => 
+        loc.id === locationId && loc.occupiedSpots > 0
+          ? { ...loc, occupiedSpots: loc.occupiedSpots - 1 } 
+          : loc
+    );
+    setLocations(updatedLocations);
+
+    // Update Firestore
+    const locationRef = doc(firestore, "parkingLocations", locationId);
+    try {
+        const locationDoc = await getDoc(locationRef);
+        if(!locationDoc.exists()) throw new Error("Location not found");
+
+        const currentSpots = locationDoc.data().occupiedSpots;
+        if(currentSpots > 0) {
+            await updateDoc(locationRef, { occupiedSpots: currentSpots - 1 });
+        }
+        if (!silent) {
+            toast({
+                title: "Booking Cancelled",
+                description: `Your booking for ${bookingToCancel.locationName} has been cancelled.`,
+            });
+        }
+    } catch(e) {
+        console.error("Failed to cancel booking:", e);
+        // Revert optimistic update
+        setLocations(originalLocations);
+        setBookingDetails(bookingToCancel);
+        setCountdown(15 * 60); // Reset timer if failed
+        if (!silent) {
+            toast({
+                title: "Cancellation Failed",
+                description: "Could not cancel booking. Please try again.",
+                variant: "destructive",
+            });
+        }
+    }
+  };
+
+  if (locationsLoading || userLoading) {
+    return <div className="container mx-auto px-4 py-8 text-center">Loading Parking Locations...</div>;
+  }
+
+  const bookedLocation = bookingDetails ? locations?.find(l => l.id === bookingDetails.locationId) : null;
+  const otherLocations = locations?.filter(l => !bookingDetails || l.id !== bookingDetails.locationId);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -126,7 +186,7 @@ export default function UserDashboard() {
         <div>
             <h2 className="text-2xl font-bold tracking-tight mb-4">{bookedLocation ? 'Other Locations' : 'Available Locations'}</h2>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {otherLocations.map((location) => (
+            {otherLocations?.map((location) => (
                 <ParkingLocationCard 
                     key={location.id} 
                     location={location}

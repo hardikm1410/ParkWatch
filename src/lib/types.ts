@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export type ParkingLocation = {
   id: string;
   name: string;
@@ -8,6 +10,7 @@ export type ParkingLocation = {
   imageUrl: string;
   imageHint: string;
   ownerId: string;
+  createdAt?: Timestamp;
 };
 
 export type HistoricalDataPoint = {
@@ -28,9 +31,10 @@ export type ParkedVehicle = {
   id: string;
   vehicleNumber: string;
   vehicleType: '2w' | '4w' | 'auto';
-  checkInTime: Date;
+  checkInTime: Date | Timestamp;
   duration: number; // in hours
   chargesPaid: number;
   locationName: string;
   mobileNumber?: string;
+  ownerId?: string;
 };
