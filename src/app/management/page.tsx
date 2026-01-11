@@ -12,7 +12,8 @@ import { parkingLocations } from '@/lib/data';
 export default function ManagementPage() {
   const { toast } = useToast();
 
-  const [locations, setLocations] = useState<ParkingLocation[]>(parkingLocations);
+  // Show only the first location on the management page
+  const [locations, setLocations] = useState<ParkingLocation[]>(parkingLocations.slice(0,1));
   const [parkedVehicles, setParkedVehicles] = useState<ParkedVehicle[]>([]);
 
   const addLocation = (newLocationData: Omit<ParkingLocation, 'id' | 'occupiedSpots' | 'imageUrl' | 'imageHint' | 'ownerId'>) => {

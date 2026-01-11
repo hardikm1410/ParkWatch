@@ -3,6 +3,9 @@ import type { ParkingLocation, HistoricalDataPoint } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
 const downtownGarageImage = PlaceHolderImages.find(p => p.id === 'downtown-garage')!;
+const cityCenterLotImage = PlaceHolderImages.find(p => p.id === 'city-center-lot')!;
+const airportParkingImage = PlaceHolderImages.find(p => p.id === 'airport-parking')!;
+const mallStructureImage = PlaceHolderImages.find(p => p.id === 'mall-structure')!;
 
 export const parkingLocations: ParkingLocation[] = [
   {
@@ -15,6 +18,39 @@ export const parkingLocations: ParkingLocation[] = [
     imageUrl: downtownGarageImage.imageUrl,
     imageHint: downtownGarageImage.imageHint,
     ownerId: "dummy-owner-1",
+  },
+  {
+    id: 'select-citywalk-saket',
+    name: 'Select Citywalk, Saket',
+    address: 'A-3, Saket District Centre, New Delhi',
+    totalSpots: 800,
+    occupiedSpots: 650,
+    currentFee: 200,
+    imageUrl: cityCenterLotImage.imageUrl,
+    imageHint: cityCenterLotImage.imageHint,
+    ownerId: "dummy-owner-2",
+  },
+  {
+    id: 'cyber-hub-gurgaon',
+    name: 'Cyber Hub, Gurgaon',
+    address: 'DLF Cyber City, Gurgaon',
+    totalSpots: 1200,
+    occupiedSpots: 1100,
+    currentFee: 250,
+    imageUrl: airportParkingImage.imageUrl,
+    imageHint: airportParkingImage.imageHint,
+    ownerId: "dummy-owner-3",
+  },
+    {
+    id: 'dlf-mall-noida',
+    name: 'DLF Mall of India',
+    address: 'Sector 18, Noida',
+    totalSpots: 1500,
+    occupiedSpots: 1300,
+    currentFee: 180,
+    imageUrl: mallStructureImage.imageUrl,
+    imageHint: mallStructureImage.imageHint,
+    ownerId: "dummy-owner-4",
   },
 ];
 
