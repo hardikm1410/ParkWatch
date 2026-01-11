@@ -1,120 +1,63 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useUser, useFirestore } from '@/firebase';
-import { useRouter } from 'next/navigation';
-import { collection, addDoc, onSnapshot, doc, updateDoc, query, where } from 'firebase/firestore';
+import { useState } from 'react';
 import type { ParkingLocation, ParkedVehicle } from '@/lib/types';
 import CreateLocationForm from '@/components/management/create-location-form';
 import ManagementLocationTable from '@/components/management/management-location-table';
 import ParkedVehiclesTable from '@/components/management/parked-vehicles-table';
 import ManualEntryForm from '@/components/management/manual-entry-form';
-import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { parkingLocations } from '@/lib/data';
 
 export default function ManagementPage() {
-  const { user, loading: userLoading } = useUser();
-  const router = useRouter();
-  const firestore = useFirestore();
   const { toast } = useToast();
 
-  const [locations, setLocations] = useState<ParkingLocation[]>([]);
+  const [locations, setLocations] = useState<ParkingLocation[]>(parkingLocations);
   const [parkedVehicles, setParkedVehicles] = useState<ParkedVehicle[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!userLoading && !user) {
-      router.push('/login');
-    }
-  }, [user, userLoading, router]);
-
-  useEffect(() => {
-    if (user && firestore) {
-      const q = query(collection(firestore, 'locations'), where('ownerId', '==', user.uid));
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const userLocations: ParkingLocation[] = [];
-        querySnapshot.forEach((doc) => {
-          userLocations.push({ id: doc.id, ...doc.data() } as ParkingLocation);
-        });
-        setLocations(userLocations);
-        setLoading(false);
-      }, (error) => {
-        console.error("Error fetching locations:", error);
-        setLoading(false);
-      });
-
-      return () => unsubscribe();
-    }
-  }, [user, firestore]);
-  
-   useEffect(() => {
-    if (!firestore) return;
-
-    const unsubscribe = onSnapshot(collection(firestore, 'parkedVehicles'), (snapshot) => {
-      const vehicles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ParkedVehicle));
-      setParkedVehicles(vehicles);
+  const addLocation = (newLocationData: Omit<ParkingLocation, 'id' | 'occupiedSpots' | 'imageUrl' | 'imageHint' | 'ownerId'>) => {
+    const newLocation: ParkingLocation = {
+      ...newLocationData,
+      id: `loc-${Math.random().toString(36).substr(2, 9)}`,
+      occupiedSpots: 0,
+      imageUrl: `https://picsum.photos/seed/${Math.random()}/600/400`,
+      imageHint: 'parking lot',
+      ownerId: 'dummy-owner',
+    };
+    setLocations(prev => [...prev, newLocation]);
+    toast({
+      title: 'Location Added',
+      description: `${newLocationData.name} has been added to your locations.`,
     });
-
-    return () => unsubscribe();
-  }, [firestore]);
-
-  const addLocation = async (newLocationData: Omit<ParkingLocation, 'id' | 'occupiedSpots' | 'imageUrl' | 'imageHint' | 'ownerId'>) => {
-    if (!firestore || !user) return;
-    try {
-      await addDoc(collection(firestore, 'locations'), {
-        ...newLocationData,
-        ownerId: user.uid,
-        occupiedSpots: 0,
-        imageUrl: `https://picsum.photos/seed/${Math.random()}/600/400`,
-        imageHint: 'parking lot',
-      });
-      toast({
-        title: 'Location Added',
-        description: `${newLocationData.name} has been added to your locations.`,
-      });
-    } catch (error) {
-      console.error("Error adding document: ", error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not add the location.',
-      });
-    }
   };
 
-  const updateOccupancy = async (locationId: string, occupiedSpots: number) => {
-    if (!firestore) return;
-    const locationRef = doc(firestore, 'locations', locationId);
-    const location = locations.find(loc => loc.id === locationId);
-    if(location) {
-        const newOccupiedSpots = Math.max(0, Math.min(location.totalSpots, occupiedSpots));
-        await updateDoc(locationRef, { occupiedSpots: newOccupiedSpots });
-    }
+  const updateOccupancy = (locationId: string, occupiedSpots: number) => {
+    setLocations(prevLocations => 
+      prevLocations.map(loc => {
+        if (loc.id === locationId) {
+          const newOccupiedSpots = Math.max(0, Math.min(loc.totalSpots, occupiedSpots));
+          return { ...loc, occupiedSpots: newOccupiedSpots };
+        }
+        return loc;
+      })
+    );
   };
 
-  const addParkedVehicle = async (vehicleData: Omit<ParkedVehicle, 'id' | 'checkInTime' | 'chargesPaid' | 'locationName'>, locationId: string) => {
-    if (!firestore) return;
+  const addParkedVehicle = (vehicleData: Omit<ParkedVehicle, 'id' | 'checkInTime' | 'chargesPaid' | 'locationName'>, locationId: string) => {
     const location = locations.find(loc => loc.id === locationId);
     if (!location) return;
 
-    const newVehicle: Omit<ParkedVehicle, 'id'> = {
+    const newVehicle: ParkedVehicle = {
+      id: `vh-${Math.random().toString(36).substr(2, 9)}`,
       ...vehicleData,
       checkInTime: new Date(),
       locationName: location.name,
       chargesPaid: vehicleData.duration * location.currentFee,
     };
     
-    await addDoc(collection(firestore, 'parkedVehicles'), newVehicle);
+    setParkedVehicles(prev => [...prev, newVehicle]);
     updateOccupancy(locationId, location.occupiedSpots + 1);
   };
-
-  if (userLoading || loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-16 w-16 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
