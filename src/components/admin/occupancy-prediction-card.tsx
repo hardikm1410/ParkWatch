@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { predictFutureOccupancy } from '@/ai/flows/predict-future-occupancy';
-import type { PredictFutureOccupancyOutput } from '@/ai/flows/predict-future-occupancy';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,10 +30,9 @@ type OccupancyPredictionCardProps = {
 };
 
 export default function OccupancyPredictionCard({ locations }: OccupancyPredictionCardProps) {
-  const [prediction, setPrediction] = useState<PredictFutureOccupancyOutput | null>(null);
+  const [prediction, setPrediction] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -49,26 +46,12 @@ export default function OccupancyPredictionCard({ locations }: OccupancyPredicti
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setIsLoading(true);
     setPrediction(null);
-    try {
-      const dateTime = new Date(data.date);
-      const [hours, minutes] = data.time.split(':').map(Number);
-      dateTime.setHours(hours, minutes);
-
-      const result = await predictFutureOccupancy({
-        parkingLocation: data.parkingLocation,
-        dateTime: dateTime.toISOString(),
-      });
-      setPrediction(result);
-    } catch (error) {
-      console.error('Prediction failed:', error);
-      toast({
+    toast({
         variant: 'destructive',
-        title: 'Prediction Error',
-        description: 'Could not generate a prediction. Please try again.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+        title: 'Feature Not Available',
+        description: 'AI features are currently disabled due to an installation issue.',
+    });
+    setIsLoading(false);
   }
 
   return (
@@ -85,18 +68,14 @@ export default function OccupancyPredictionCard({ locations }: OccupancyPredicti
             </CardDescription>
           </CardHeader>
           <CardContent className="grid md:grid-cols-3 gap-6">
-            {!geminiApiKey && (
-                <div className="md:col-span-3">
-                    <Alert variant="destructive">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>API Key Missing</AlertTitle>
-                        <AlertDescription>
-                        The Gemini API key is not configured. Please set it in the environment variables.
-                        </AlertDescription>
-                    </Alert>
-                </div>
-            )}
-            <fieldset disabled={!geminiApiKey} className="grid md:grid-cols-3 gap-6 contents">
+            <Alert variant="destructive" className="md:col-span-3">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Feature Disabled</AlertTitle>
+                <AlertDescription>
+                The AI prediction feature is temporarily unavailable.
+                </AlertDescription>
+            </Alert>
+            <fieldset disabled={true} className="grid md:grid-cols-3 gap-6 contents">
                 <FormField
                 control={form.control}
                 name="parkingLocation"
@@ -172,7 +151,7 @@ export default function OccupancyPredictionCard({ locations }: OccupancyPredicti
             </fieldset>
           </CardContent>
           <CardFooter className="flex flex-col items-start gap-4">
-            <Button type="submit" disabled={isLoading || !geminiApiKey}>
+            <Button type="submit" disabled={true}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -182,34 +161,6 @@ export default function OccupancyPredictionCard({ locations }: OccupancyPredicti
                 'Predict Occupancy'
               )}
             </Button>
-
-            {prediction && (
-              <Card className="w-full bg-accent/20">
-                <CardHeader>
-                  <CardTitle className="text-lg">AI Prediction Result</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-around text-center">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Predicted Occupancy</p>
-                      <p className="text-3xl font-bold text-primary">
-                        {prediction.predictedOccupancyRate.toFixed(1)}%
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Recommended Fee</p>
-                      <p className="text-3xl font-bold text-primary">
-                        ₹{prediction.recommendedParkingFee.toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Reasoning:</p>
-                    <p className="text-sm text-muted-foreground">{prediction.reasoning}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </CardFooter>
         </form>
       </Form>

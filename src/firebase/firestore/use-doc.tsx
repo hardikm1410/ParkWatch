@@ -1,7 +1,12 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { onSnapshot, DocumentReference, DocumentData } from 'firebase/firestore';
+// import { onSnapshot, DocumentReference, DocumentData } from 'firebase/firestore';
+
+type DocumentReference = any;
+type DocumentData = any;
+
 
 interface UseDoc<T> {
   data: T | null;
@@ -19,41 +24,43 @@ export function useDoc<T extends DocumentData>(
   const docRefRef = useRef(docRef);
 
   useEffect(() => {
-    // Comparison to avoid re-running the effect if the reference object changes but path is the same
-    if (docRefRef.current?.path !== docRef?.path) {
-        docRefRef.current = docRef;
-    }
+    setLoading(false);
+    // // Comparison to avoid re-running the effect if the reference object changes but path is the same
+    // if (docRefRef.current?.path !== docRef?.path) {
+    //     docRefRef.current = docRef;
+    // }
   }, [docRef]);
 
 
   useEffect(() => {
-    if (!docRefRef.current) {
-      setLoading(false);
-      setData(null);
-      return;
-    }
+    setLoading(false);
+    // if (!docRefRef.current) {
+    //   setLoading(false);
+    //   setData(null);
+    //   return;
+    // }
 
-    setLoading(true);
+    // setLoading(true);
 
-    const unsubscribe = onSnapshot(
-      docRefRef.current,
-      (doc) => {
-        if (doc.exists()) {
-          setData({ id: doc.id, ...doc.data() } as T);
-        } else {
-          setData(null);
-        }
-        setLoading(false);
-        setError(null);
-      },
-      (err) => {
-        console.error("Error fetching document: ", err);
-        setError(err);
-        setLoading(false);
-      }
-    );
+    // const unsubscribe = onSnapshot(
+    //   docRefRef.current,
+    //   (doc) => {
+    //     if (doc.exists()) {
+    //       setData({ id: doc.id, ...doc.data() } as T);
+    //     } else {
+    //       setData(null);
+    //     }
+    //     setLoading(false);
+    //     setError(null);
+    //   },
+    //   (err) => {
+    //     console.error("Error fetching document: ", err);
+    //     setError(err);
+    //     setLoading(false);
+    //   }
+    // );
 
-    return () => unsubscribe();
+    // return () => unsubscribe();
   }, [docRefRef.current]);
 
   return { data, loading, error };

@@ -1,4 +1,7 @@
-import type { Timestamp } from 'firebase/firestore';
+
+// import type { Timestamp } from 'firebase/firestore';
+
+type Timestamp = any;
 
 export type ParkingLocation = {
   id: string;

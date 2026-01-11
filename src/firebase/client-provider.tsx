@@ -1,6 +1,7 @@
+
 'use client';
 
-import { FirebaseProvider } from './provider';
+// import { FirebaseProvider } from './provider';
 
 // This provider ensures that Firebase is only initialized once on the client.
 export function FirebaseClientProvider({
@@ -8,5 +9,5 @@ export function FirebaseClientProvider({
 }: {
   children: React.ReactNode;
 }) {
-  return <FirebaseProvider>{children}</FirebaseProvider>;
+  return <>{children}</>;
 }

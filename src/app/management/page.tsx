@@ -1,68 +1,37 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { ParkingLocation, ParkedVehicle } from '@/lib/types';
 import CreateLocationForm from '@/components/management/create-location-form';
 import ManagementLocationTable from '@/components/management/management-location-table';
 import ParkedVehiclesTable from '@/components/management/parked-vehicles-table';
 import ManualEntryForm from '@/components/management/manual-entry-form';
 import { useToast } from '@/hooks/use-toast';
-import { useUser, useFirestore, useCollection } from '@/firebase/index';
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  doc,
-  serverTimestamp,
-  query,
-  where,
-  getDocs,
-  writeBatch,
-} from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
-import type { Firestore } from 'firebase/firestore';
 
 export default function ManagementPage() {
   const { toast } = useToast();
-  const { user, loading: userLoading } = useUser();
-  const firestore = useFirestore() as Firestore;
-  const router = useRouter();
+  const user = { uid: 'temp-manager-user' }; // Mock user
 
-  const locationsQuery =
-    user && firestore
-      ? query(
-          collection(firestore, 'parkingLocations'),
-          where('ownerId', '==', user.uid)
-        )
-      : null;
-
-  const { data: locations, loading: locationsLoading } =
-    useCollection<ParkingLocation>(locationsQuery);
+  const [locations, setLocations] = useState<ParkingLocation[]>([]);
+  const locationsLoading = false;
 
   const [parkedVehicles, setParkedVehicles] = useState<ParkedVehicle[]>([]);
-
-  useEffect(() => {
-    if (!userLoading && !user) {
-      router.push('/login?redirect=/management');
-    }
-  }, [user, userLoading, router]);
 
   const addLocation = async (
     newLocationData: Omit<ParkingLocation, 'id' | 'occupiedSpots' | 'imageUrl' | 'imageHint' | 'ownerId'>
   ) => {
-    if (!user || !firestore) return;
+    if (!user) return;
 
     try {
-      const docRef = await addDoc(collection(firestore, 'parkingLocations'), {
+      const newLocation: ParkingLocation = {
+        id: `loc-${Date.now()}`,
         ...newLocationData,
         occupiedSpots: 0,
-        // Using a placeholder image for now
         imageUrl: `https://picsum.photos/seed/${Math.random()}/600/400`,
         imageHint: 'parking lot',
         ownerId: user.uid,
-        createdAt: serverTimestamp(),
-      });
-      console.log('Document written with ID: ', docRef.id);
+      }
+      setLocations(prev => [...prev, newLocation]);
       toast({
         title: 'Location Added',
         description: `${newLocationData.name} has been added to your locations.`,
@@ -78,44 +47,32 @@ export default function ManagementPage() {
   };
 
   const updateOccupancy = async (locationId: string, occupiedSpots: number) => {
-    if (!firestore) return;
     const location = locations?.find(loc => loc.id === locationId);
     if (!location) return;
 
     const newOccupiedSpots = Math.max(0, Math.min(location.totalSpots, occupiedSpots));
 
-    const locationRef = doc(firestore, 'parkingLocations', locationId);
-    try {
-      await updateDoc(locationRef, { occupiedSpots: newOccupiedSpots });
-    } catch (e) {
-      console.error('Error updating occupancy: ', e);
-    }
+    setLocations(prev => prev.map(loc => loc.id === locationId ? { ...loc, occupiedSpots: newOccupiedSpots } : loc));
   };
 
   const addParkedVehicle = async (
     vehicleData: Omit<ParkedVehicle, 'id' | 'checkInTime' | 'chargesPaid' | 'locationName'>,
     locationId: string
   ) => {
-    if (!firestore) return;
     const location = locations?.find(loc => loc.id === locationId);
     if (!location) return;
 
-    const newVehicle: Omit<ParkedVehicle, 'id'> = {
+    const newVehicle: ParkedVehicle = {
       ...vehicleData,
+      id: `vh-${Date.now()}`,
       checkInTime: new Date(),
       locationName: location.name,
       chargesPaid: vehicleData.duration * location.currentFee,
     };
     
-    // In a real app, this would be a transaction
     try {
-      await addDoc(collection(firestore, 'parkedVehicles'), newVehicle);
-      await updateOccupancy(locationId, location.occupiedSpots + 1);
-
-      // This part is for local state update. `useCollection` will handle this for locations.
-      // For parked vehicles, we'd ideally use another `useCollection` hook.
-      // For now, simple local update.
-      setParkedVehicles(prev => [...prev, { ...newVehicle, id: `temp-${Date.now()}` }]);
+      setParkedVehicles(prev => [...prev, newVehicle]);
+      updateOccupancy(locationId, location.occupiedSpots + 1);
     } catch(e) {
       console.error(e);
       toast({
@@ -126,16 +83,12 @@ export default function ManagementPage() {
     }
   };
   
-  if (userLoading || locationsLoading) {
+  if (locationsLoading) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         Loading Management Dashboard...
       </div>
     );
-  }
-
-  if (!user) {
-    return null; // Redirect is handled by useEffect
   }
 
   return (

@@ -1,47 +1,27 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { ParkingLocation } from '@/lib/types';
 import AdminLocationTable from '@/components/admin/admin-location-table';
-import OccupancyPredictionCard from '@/components/admin/occupancy-prediction-card';
 import FeeRecommendationCard from '@/components/admin/fee-recommendation-card';
-import { useUser, useFirestore, useCollection } from '@/firebase/index';
-import { collection, query, where, Firestore } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
+import OccupancyPredictionCard from '@/components/admin/occupancy-prediction-card';
 
 export default function AdminPage() {
-  const { user, loading: userLoading } = useUser();
-  const firestore = useFirestore() as Firestore;
-  const router = useRouter();
 
-  const locationsQuery =
-    user && firestore
-      ? query(
-          collection(firestore, 'parkingLocations'),
-          where('ownerId', '==', user.uid)
-        )
-      : null;
+  const [locations] = useState<ParkingLocation[]>([
+      {id: 'demo-1', name: 'Demo North Lot', address: '123 Demo St', totalSpots: 100, occupiedSpots: 78, currentFee: 50, imageUrl: `https://picsum.photos/seed/loc1/600/400`, imageHint: 'parking lot', ownerId: 'temp-admin-user'},
+      {id: 'demo-2', name: 'Demo South Lot', address: '456 Demo Ave', totalSpots: 150, occupiedSpots: 45, currentFee: 60, imageUrl: `https://picsum.photos/seed/loc2/600/400`, imageHint: 'parking garage', ownerId: 'temp-admin-user'},
+      {id: 'demo-3', name: 'Demo Downtown Garage', address: '789 Demo Blvd', totalSpots: 250, occupiedSpots: 220, currentFee: 75, imageUrl: `https://picsum.photos/seed/loc3/600/400`, imageHint: 'underground parking', ownerId: 'temp-admin-user'}
+  ]);
+  const locationsLoading = false;
 
-  const { data: locations, loading: locationsLoading } =
-    useCollection<ParkingLocation>(locationsQuery);
-
-  useEffect(() => {
-    if (!userLoading && !user) {
-      router.push('/login?redirect=/admin');
-    }
-  }, [user, userLoading, router]);
-
-  if (userLoading || locationsLoading) {
+  if (locationsLoading) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         Loading Admin Dashboard...
       </div>
     );
-  }
-
-  if (!user) {
-    return null;
   }
 
   return (
@@ -50,14 +30,12 @@ export default function AdminPage() {
         Admin Dashboard
       </h1>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-2">
           <AdminLocationTable locations={locations || []} />
         </div>
-        <div className="lg:col-span-2">
-          <OccupancyPredictionCard locations={locations || []} />
-        </div>
-        <div>
-          <FeeRecommendationCard locations={locations || []} />
+        <div className="space-y-8">
+            <OccupancyPredictionCard locations={locations || []} />
+            <FeeRecommendationCard locations={locations || []} />
         </div>
       </div>
     </div>

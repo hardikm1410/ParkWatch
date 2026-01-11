@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { recommendOptimalFees } from '@/ai/flows/recommend-optimal-fees';
-import type { RecommendOptimalFeesOutput } from '@/ai/flows/recommend-optimal-fees';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,10 +25,9 @@ type FeeRecommendationCardProps = {
 };
 
 export default function FeeRecommendationCard({ locations }: FeeRecommendationCardProps) {
-  const [recommendation, setRecommendation] = useState<RecommendOptimalFeesOutput | null>(null);
+  const [recommendation, setRecommendation] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -55,23 +52,12 @@ export default function FeeRecommendationCard({ locations }: FeeRecommendationCa
 
     setIsLoading(true);
     setRecommendation(null);
-    try {
-      const result = await recommendOptimalFees({
-        parkingLocation: data.parkingLocation,
-        currentFee: selectedLocation.currentFee,
-        predictedOccupancy: data.predictedOccupancy / 100,
-      });
-      setRecommendation(result);
-    } catch (error) {
-      console.error('Recommendation failed:', error);
-      toast({
+    toast({
         variant: 'destructive',
-        title: 'Recommendation Error',
-        description: 'Could not generate a recommendation. Please try again.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+        title: 'Feature Not Available',
+        description: 'AI features are currently disabled due to an installation issue.',
+    });
+    setIsLoading(false);
   }
 
   return (
@@ -88,16 +74,14 @@ export default function FeeRecommendationCard({ locations }: FeeRecommendationCa
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {!geminiApiKey && (
-              <Alert variant="destructive">
+            <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>API Key Missing</AlertTitle>
+                <AlertTitle>Feature Disabled</AlertTitle>
                 <AlertDescription>
-                  The Gemini API key is not configured. Please set it in the environment variables.
+                The AI recommendation feature is temporarily unavailable.
                 </AlertDescription>
-              </Alert>
-            )}
-            <fieldset disabled={!geminiApiKey} className="space-y-6">
+            </Alert>
+            <fieldset disabled={true} className="space-y-6">
               <FormField
                 control={form.control}
                 name="parkingLocation"
@@ -150,7 +134,7 @@ export default function FeeRecommendationCard({ locations }: FeeRecommendationCa
             </fieldset>
           </CardContent>
           <CardFooter className="flex flex-col items-start gap-4">
-            <Button type="submit" disabled={isLoading || !geminiApiKey} className="bg-accent hover:bg-accent/90">
+            <Button type="submit" disabled={true} className="bg-accent hover:bg-accent/90">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -160,25 +144,6 @@ export default function FeeRecommendationCard({ locations }: FeeRecommendationCa
                 'Recommend Fee'
               )}
             </Button>
-            {recommendation && (
-              <Card className="w-full bg-primary/10">
-                <CardHeader>
-                  <CardTitle className="text-lg">AI Fee Recommendation</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground">Recommended Fee</p>
-                    <p className="text-4xl font-bold text-accent">
-                      ₹{recommendation.recommendedFee.toFixed(2)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Reasoning:</p>
-                    <p className="text-sm text-muted-foreground">{recommendation.reasoning}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </CardFooter>
         </form>
       </Form>

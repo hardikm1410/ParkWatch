@@ -1,11 +1,12 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+// import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
+  // ChartTooltip,
+  // ChartTooltipContent,
 } from '@/components/ui/chart';
 import {
   Select,
@@ -64,7 +65,9 @@ export default function HistoricalTrendChart({ locationId }: HistoricalTrendChar
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-[150px] w-full">
+        <div className="h-[150px] w-full flex items-center justify-center text-muted-foreground">
+          Charting library not available.
+          {/* 
           <ChartContainer config={chartConfig}>
             <BarChart accessibilityLayer data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -89,6 +92,7 @@ export default function HistoricalTrendChart({ locationId }: HistoricalTrendChar
               <Bar dataKey="occupancy" fill="var(--color-occupancy)" radius={4} />
             </BarChart>
           </ChartContainer>
+          */}
         </div>
       </CardContent>
     </Card>
