@@ -7,6 +7,7 @@ export type ParkingLocation = {
   currentFee: number;
   imageUrl: string;
   imageHint: string;
+  ownerId: string;
 };
 
 export type HistoricalDataPoint = {

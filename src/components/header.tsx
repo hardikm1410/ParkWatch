@@ -2,12 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ParkingCircle, User, Shield, Wrench, LayoutGrid } from 'lucide-react';
+import { ParkingCircle, User, Shield, Wrench, LogIn, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useUser, useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 export function Header() {
   const pathname = usePathname();
+  const { user } = useUser();
+  const auth = useAuth();
+
+  const handleLogout = async () => {
+    if (auth) {
+      await signOut(auth);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -18,7 +28,7 @@ export function Header() {
             ParkWatch
           </span>
         </Link>
-        <nav className="flex items-center space-x-2">
+        <nav className="flex items-center space-x-2 flex-1">
           <Button
             variant="ghost"
             className={cn(
@@ -59,6 +69,21 @@ export function Header() {
             </Link>
           </Button>
         </nav>
+        <div className="flex items-center">
+          {user ? (
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          ) : (
+            <Button variant="outline" asChild>
+              <Link href="/login">
+                <LogIn className="mr-2 h-4 w-4" />
+                Login
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
     </header>
   );

@@ -1,37 +1,53 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { parkingLocations as initialLocations } from '@/lib/data';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
 import type { ParkingLocation, BookingDetails } from '@/lib/types';
 import ParkingLocationCard from '@/components/user/parking-location-card';
 import { Separator } from '@/components/ui/separator';
 
 export default function UserDashboard() {
-  const [locations, setLocations] = useState<ParkingLocation[]>(initialLocations);
+  const firestore = useFirestore();
+  const [locations, setLocations] = useState<ParkingLocation[]>([]);
   const [bookingDetails, setBookingDetails] = useState<
     (BookingDetails & { locationId: string }) | null
   >(null);
   const [countdown, setCountdown] = useState(0);
 
   useEffect(() => {
-    // Simulate occupancy changes for unbooked locations
-    const interval = setInterval(() => {
-      setLocations((prevLocations) =>
-        prevLocations.map((loc) => {
-          if (bookingDetails && loc.id === bookingDetails.locationId) {
-            return loc; // Don't simulate changes for the booked location
-          }
-          const change = Math.random() > 0.7 ? (Math.random() > 0.5 ? 1 : -1) : 0;
-          let newOccupiedSpots = loc.occupiedSpots + change;
-          if (newOccupiedSpots < 0) newOccupiedSpots = 0;
-          if (newOccupiedSpots > loc.totalSpots) newOccupiedSpots = loc.totalSpots;
-          return { ...loc, occupiedSpots: newOccupiedSpots };
-        })
-      );
-    }, 3000); 
+    if (!firestore) return;
 
-    return () => clearInterval(interval);
-  }, [bookingDetails]);
+    const unsubscribe = onSnapshot(collection(firestore, 'locations'), (snapshot) => {
+      const fetchedLocations: ParkingLocation[] = [];
+      snapshot.forEach((doc) => {
+        fetchedLocations.push({ id: doc.id, ...doc.data() } as ParkingLocation);
+      });
+
+      // Simulate occupancy changes for unbooked locations
+      setLocations(currentLocations => {
+        return fetchedLocations.map(newLoc => {
+          const oldLoc = currentLocations.find(l => l.id === newLoc.id);
+          // If a booking is active for this location, don't simulate changes
+          if (bookingDetails && newLoc.id === bookingDetails.locationId) {
+            return { ...newLoc, occupiedSpots: newLoc.occupiedSpots };
+          }
+          // Only apply random change if it's not a newly fetched location list
+          if (oldLoc) {
+            const change = Math.random() > 0.7 ? (Math.random() > 0.5 ? 1 : -1) : 0;
+            let newOccupiedSpots = newLoc.occupiedSpots + change;
+            if (newOccupiedSpots < 0) newOccupiedSpots = 0;
+            if (newOccupiedSpots > newLoc.totalSpots) newOccupiedSpots = newLoc.totalSpots;
+            return { ...newLoc, occupiedSpots: newOccupiedSpots };
+          }
+          return newLoc;
+        });
+      });
+    });
+
+    return () => unsubscribe();
+  }, [firestore, bookingDetails]);
+
 
   useEffect(() => {
     let timer: NodeJS.Timeout;

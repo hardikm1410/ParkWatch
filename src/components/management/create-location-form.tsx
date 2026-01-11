@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
 import { PlusCircle, FileCheck } from 'lucide-react';
 
 const FormSchema = z.object({
@@ -17,7 +16,6 @@ const FormSchema = z.object({
   currentFee: z.coerce.number().min(0, 'Fee must be a positive number.'),
   document: z
     .any()
-    // This validation is for client-side, browser environments
     .refine((files) => typeof window === 'undefined' || (files instanceof FileList && files.length > 0), 'A verification document is required.')
 });
 
@@ -26,7 +24,6 @@ type CreateLocationFormProps = {
 };
 
 export default function CreateLocationForm({ onAddLocation }: CreateLocationFormProps) {
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -41,15 +38,10 @@ export default function CreateLocationForm({ onAddLocation }: CreateLocationForm
   const documentRef = form.register("document");
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    // For now, we are not handling the file upload itself, just the form data.
     const { document, ...locationData } = data;
     console.log("Verification document submitted:", document[0].name);
 
     onAddLocation(locationData);
-    toast({
-      title: 'Location Added',
-      description: `${data.name} has been added to your locations.`,
-    });
     form.reset();
   }
 

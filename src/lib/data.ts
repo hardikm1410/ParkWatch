@@ -18,6 +18,7 @@ export const parkingLocations: ParkingLocation[] = [
     currentFee: 150,
     imageUrl: downtownGarageImage.imageUrl,
     imageHint: downtownGarageImage.imageHint,
+    ownerId: "dummy-owner-1",
   },
   {
     id: 'indiranagar-bangalore',
@@ -28,6 +29,7 @@ export const parkingLocations: ParkingLocation[] = [
     currentFee: 100,
     imageUrl: cityCenterLotImage.imageUrl,
     imageHint: cityCenterLotImage.imageHint,
+    ownerId: "dummy-owner-1",
   },
   {
     id: 'mumbai-airport',
@@ -38,6 +40,7 @@ export const parkingLocations: ParkingLocation[] = [
     currentFee: 250,
     imageUrl: airportParkingImage.imageUrl,
     imageHint: airportParkingImage.imageHint,
+    ownerId: "dummy-owner-2",
   },
   {
     id: 'express-avenue-chennai',
@@ -48,6 +51,7 @@ export const parkingLocations: ParkingLocation[] = [
     currentFee: 80,
     imageUrl: mallStructureImage.imageUrl,
     imageHint: mallStructureImage.imageHint,
+    ownerId: "dummy-owner-2",
   },
   {
     id: 'wankhede-stadium-mumbai',
@@ -58,6 +62,7 @@ export const parkingLocations: ParkingLocation[] = [
     currentFee: 550,
     imageUrl: stadiumLotImage.imageUrl,
     imageHint: stadiumLotImage.imageHint,
+    ownerId: "dummy-owner-1",
   },
 ];
 
