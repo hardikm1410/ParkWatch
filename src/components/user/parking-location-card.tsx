@@ -3,7 +3,9 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import type { ParkingLocation, BookingDetails } from '@/lib/types';
+import { useUser } from '@/firebase';
 import {
   Card,
   CardContent,
@@ -41,11 +43,18 @@ export default function ParkingLocationCard({
 }: ParkingLocationCardProps) {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const { user } = useUser();
+  const router = useRouter();
+
 
   const availableSpots = location.totalSpots - location.occupiedSpots - (isBooked ? 1 : 0);
   const occupiedSpots = location.occupiedSpots + (isBooked ? 1 : 0);
 
   const handleBookingInitiation = () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
     if (availableSpots > 0) {
       setIsBookingModalOpen(true);
     }

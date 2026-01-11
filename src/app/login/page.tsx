@@ -16,7 +16,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/management');
+      router.push('/');
     }
   }, [user, loading, router]);
 
@@ -25,7 +25,7 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      router.push('/management');
+      router.push('/');
     } catch (error) {
       console.error('Error during Google sign-in:', error);
     }
@@ -39,8 +39,8 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-          <CardDescription>Sign in to access the management portal.</CardDescription>
+          <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
+          <CardDescription>Sign in to book your parking spot.</CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={handleGoogleSignIn} className="w-full">
