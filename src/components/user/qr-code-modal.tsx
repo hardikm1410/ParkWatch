@@ -34,7 +34,7 @@ export default function QrCodeModal({
     duration: bookingDetails.duration,
     finalFee: bookingDetails.finalFee,
   });
-  const qrCodeUrl = `https://picsum.photos/seed/${bookingDetails.vehicleNumber}/256/256`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrCodeData)}`;
   
   const vehicleTypeMap = {
     '2w': '2 Wheeler',
