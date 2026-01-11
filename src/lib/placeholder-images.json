@@ -17,6 +17,18 @@
       "description": "A large airport parking area",
       "imageUrl": "https://images.unsplash.com/photo-1630183921674-47cc47ad831e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxhaXJwb3J0JTIwcGFya2luZ3xlbnwwfHx8fDE3NjcxNzQ4NzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "airport parking"
+    },
+    {
+      "id": "express-avenue-mall",
+      "description": "Underground parking at a shopping mall",
+      "imageUrl": "https://images.unsplash.com/photo-1580610447943-1bfbef54f4c6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzaG9wcGluZyUyMG1hbGwlMjBwYXJraW5nfGVufDB8fHx8MTc2NzI3NjgxOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mall parking"
+    },
+    {
+      "id": "wankhede-stadium",
+      "description": "Parking lot outside a large sports stadium",
+      "imageUrl": "https://images.unsplash.com/photo-1518826762442-823a0932eea2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdGFkaXVtJTIwcGFya2luZ3xlbnwwfHx8fDE3NjcyNzY4NjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "stadium parking"
     }
   ]
 }
