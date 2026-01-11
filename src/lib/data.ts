@@ -2,10 +2,10 @@
 import type { ParkingLocation, HistoricalDataPoint } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
-const downtownGarageImage = PlaceHolderImages.find(p => p.id === 'downtown-garage')!;
-const cityCenterLotImage = PlaceHolderImages.find(p => p.id === 'city-center-lot')!;
-const airportParkingImage = PlaceHolderImages.find(p => p.id === 'airport-parking')!;
-const mallStructureImage = PlaceHolderImages.find(p => p.id === 'mall-structure')!;
+const connaughtPlaceImage = PlaceHolderImages.find(p => p.id === 'downtown-garage')!;
+const indiranagarImage = PlaceHolderImages.find(p => p.id === 'indiranagar-metro')!;
+const mumbaiAirportImage = PlaceHolderImages.find(p => p.id === 'mumbai-airport')!;
+
 
 export const parkingLocations: ParkingLocation[] = [
   {
@@ -13,44 +13,33 @@ export const parkingLocations: ParkingLocation[] = [
     name: 'Connaught Place Parking',
     address: 'Inner Circle, New Delhi',
     totalSpots: 500,
-    occupiedSpots: 450,
+    occupiedSpots: 52,
     currentFee: 150,
-    imageUrl: downtownGarageImage.imageUrl,
-    imageHint: downtownGarageImage.imageHint,
+    imageUrl: connaughtPlaceImage.imageUrl,
+    imageHint: connaughtPlaceImage.imageHint,
     ownerId: "dummy-owner-1",
   },
   {
-    id: 'select-citywalk-saket',
-    name: 'Select Citywalk, Saket',
-    address: 'A-3, Saket District Centre, New Delhi',
-    totalSpots: 800,
-    occupiedSpots: 650,
-    currentFee: 200,
-    imageUrl: cityCenterLotImage.imageUrl,
-    imageHint: cityCenterLotImage.imageHint,
+    id: 'indiranagar-metro-lot',
+    name: 'Indiranagar Metro Lot',
+    address: 'CMH Road, Bangalore',
+    totalSpots: 200,
+    occupiedSpots: 53,
+    currentFee: 100,
+    imageUrl: indiranagarImage.imageUrl,
+    imageHint: indiranagarImage.imageHint,
     ownerId: "dummy-owner-2",
   },
   {
-    id: 'cyber-hub-gurgaon',
-    name: 'Cyber Hub, Gurgaon',
-    address: 'DLF Cyber City, Gurgaon',
-    totalSpots: 1200,
-    occupiedSpots: 1100,
-    currentFee: 250,
-    imageUrl: airportParkingImage.imageUrl,
-    imageHint: airportParkingImage.imageHint,
-    ownerId: "dummy-owner-3",
-  },
-    {
-    id: 'dlf-mall-noida',
-    name: 'DLF Mall of India',
-    address: 'Sector 18, Noida',
+    id: 'mumbai-airport-parking',
+    name: 'Mumbai Airport Parking',
+    address: 'Chhatrapati Shivaji Maharaj Int\'l',
     totalSpots: 1500,
-    occupiedSpots: 1300,
-    currentFee: 180,
-    imageUrl: mallStructureImage.imageUrl,
-    imageHint: mallStructureImage.imageHint,
-    ownerId: "dummy-owner-4",
+    occupiedSpots: 200,
+    currentFee: 250,
+    imageUrl: mumbaiAirportImage.imageUrl,
+    imageHint: mumbaiAirportImage.imageHint,
+    ownerId: "dummy-owner-3",
   },
 ];
 
