@@ -1,12 +1,8 @@
+
 import type { ParkingLocation, HistoricalDataPoint } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
 const downtownGarageImage = PlaceHolderImages.find(p => p.id === 'downtown-garage')!;
-const cityCenterLotImage = PlaceHolderImages.find(p => p.id === 'city-center-lot')!;
-const airportParkingImage = PlaceHolderImages.find(p => p.id === 'airport-parking')!;
-const mallStructureImage = PlaceHolderImages.find(p => p.id === 'mall-structure')!;
-const stadiumLotImage = PlaceHolderImages.find(p => p.id === 'stadium-lot')!;
-
 
 export const parkingLocations: ParkingLocation[] = [
   {
@@ -18,50 +14,6 @@ export const parkingLocations: ParkingLocation[] = [
     currentFee: 150,
     imageUrl: downtownGarageImage.imageUrl,
     imageHint: downtownGarageImage.imageHint,
-    ownerId: "dummy-owner-1",
-  },
-  {
-    id: 'indiranagar-bangalore',
-    name: 'Indiranagar Metro Lot',
-    address: 'CMH Road, Bangalore',
-    totalSpots: 200,
-    occupiedSpots: 150,
-    currentFee: 100,
-    imageUrl: cityCenterLotImage.imageUrl,
-    imageHint: cityCenterLotImage.imageHint,
-    ownerId: "dummy-owner-1",
-  },
-  {
-    id: 'mumbai-airport',
-    name: 'Mumbai Airport Parking',
-    address: 'Chhatrapati Shivaji Maharaj Int\'l',
-    totalSpots: 1500,
-    occupiedSpots: 1300,
-    currentFee: 250,
-    imageUrl: airportParkingImage.imageUrl,
-    imageHint: airportParkingImage.imageHint,
-    ownerId: "dummy-owner-2",
-  },
-  {
-    id: 'express-avenue-chennai',
-    name: 'Express Avenue Mall',
-    address: 'Whites Road, Royapettah, Chennai',
-    totalSpots: 1000,
-    occupiedSpots: 700,
-    currentFee: 80,
-    imageUrl: mallStructureImage.imageUrl,
-    imageHint: mallStructureImage.imageHint,
-    ownerId: "dummy-owner-2",
-  },
-  {
-    id: 'wankhede-stadium-mumbai',
-    name: 'Wankhede Stadium Lot',
-    address: 'D Road, Churchgate, Mumbai',
-    totalSpots: 1800,
-    occupiedSpots: 300,
-    currentFee: 550,
-    imageUrl: stadiumLotImage.imageUrl,
-    imageHint: stadiumLotImage.imageHint,
     ownerId: "dummy-owner-1",
   },
 ];
