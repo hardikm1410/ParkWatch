@@ -6,18 +6,16 @@ import type { ParkingLocation } from '@/lib/types';
 import SpotVisualizer from '@/components/management/spot-visualizer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export default function VisualizerPage() {
+export default function VisualizerClient() {
   const searchParams = useSearchParams();
   const initialLocationId = searchParams.get('location');
 
-  const user = { uid: 'temp-manager-user' }; // Mock user
+  const user = { uid: 'temp-manager-user' };
   const [parkingLocations] = useState<ParkingLocation[]>([
-      {id: 'demo-1', name: 'Demo North Lot', address: '123 Demo St', totalSpots: 100, occupiedSpots: 78, currentFee: 50, imageUrl: '', imageHint: '', ownerId: user.uid},
-      {id: 'demo-2', name: 'Demo South Lot', address: '456 Demo Ave', totalSpots: 150, occupiedSpots: 45, currentFee: 60, imageUrl: '', imageHint: '', ownerId: user.uid}
+    {id: 'demo-1', name: 'Demo North Lot', address: '123 Demo St', totalSpots: 100, occupiedSpots: 78, currentFee: 50, imageUrl: '', imageHint: '', ownerId: user.uid},
+    {id: 'demo-2', name: 'Demo South Lot', address: '456 Demo Ave', totalSpots: 150, occupiedSpots: 45, currentFee: 60, imageUrl: '', imageHint: '', ownerId: user.uid}
   ]);
   const locationsLoading = false;
-
-  // Set initial selection ONCE from params, but never auto-switch after
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(initialLocationId);
 
   const selectedLocation = useMemo(() => {
@@ -25,8 +23,8 @@ export default function VisualizerPage() {
   }, [selectedLocationId, parkingLocations]);
 
   const handleLocationChange = (locationId: string) => {
-      setSelectedLocationId(locationId);
-  }
+    setSelectedLocationId(locationId);
+  };
 
   if (locationsLoading) {
     return <div className="container mx-auto px-4 py-8 text-center">Loading Visualizer...</div>;
@@ -39,21 +37,21 @@ export default function VisualizerPage() {
           Parking Spot Visualizer
         </h1>
         <div className="w-full sm:w-auto">
-            <Select onValueChange={handleLocationChange} value={selectedLocationId || ''}>
+          <Select onValueChange={handleLocationChange} value={selectedLocationId || ''}>
             <SelectTrigger className="w-full sm:w-[280px]">
-                <SelectValue placeholder="Select a location..." />
+              <SelectValue placeholder="Select a location..." />
             </SelectTrigger>
             <SelectContent>
-                {parkingLocations?.map((location: any) => (
+              {parkingLocations?.map((location: any) => (
                 <SelectItem key={location.id} value={location.id}>
-                    {location.name}
+                  {location.name}
                 </SelectItem>
-                ))}
+              ))}
             </SelectContent>
-            </Select>
+          </Select>
         </div>
       </div>
-      
+
       {selectedLocation ? (
         <SpotVisualizer location={selectedLocation} />
       ) : (
