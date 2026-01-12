@@ -1,22 +1,6 @@
-
-
-
-
-import { Suspense } from 'react';
-
-// Your existing code...
-export default function VisualizerPageWrapper() {
-  return (
-    <Suspense fallback={<div>Loading visualizer...</div>}>
-      <VisualizerPage />
-    </Suspense>
-  );
-}
-
-// Now refactor "VisualizerPage" to be your actual client component as before:
 'use client';
-// ... VisualizerPage code from your previous example ...
-import { useState, useMemo, useEffect } from 'react';
+
+import { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type { ParkingLocation } from '@/lib/types';
 import SpotVisualizer from '@/components/management/spot-visualizer';
@@ -33,20 +17,13 @@ export default function VisualizerPage() {
   ]);
   const locationsLoading = false;
 
+  // Set initial selection ONCE from params, but never auto-switch after
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(initialLocationId);
-
-  useEffect(() => {
-    // If no location is selected but locations are loaded, select the first one.
-    if (!selectedLocationId && parkingLocations && parkingLocations.length > 0) {
-      const firstLocationId = parkingLocations[0].id;
-      setSelectedLocationId(firstLocationId);
-    }
-  }, [selectedLocationId, parkingLocations]);
 
   const selectedLocation = useMemo(() => {
     return parkingLocations?.find(loc => loc.id === selectedLocationId) || null;
   }, [selectedLocationId, parkingLocations]);
-  
+
   const handleLocationChange = (locationId: string) => {
       setSelectedLocationId(locationId);
   }
