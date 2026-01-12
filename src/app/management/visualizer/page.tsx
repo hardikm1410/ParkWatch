@@ -1,6 +1,21 @@
 
-'use client';
 
+
+
+import { Suspense } from 'react';
+
+// Your existing code...
+export default function VisualizerPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading visualizer...</div>}>
+      <VisualizerPage />
+    </Suspense>
+  );
+}
+
+// Now refactor "VisualizerPage" to be your actual client component as before:
+'use client';
+// ... VisualizerPage code from your previous example ...
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type { ParkingLocation } from '@/lib/types';
